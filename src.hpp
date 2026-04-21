@@ -141,21 +141,19 @@ public:
     }
 
     std::pair<iterator, bool> emplace(T key) {
-        Node *l, *m, *r;
-        split(root, key - 1, l, r);
-        split(r, key, m, r);
-        bool inserted = false;
-        Node* res_node;
-        if (!m) {
-            m = new Node(key);
-            inserted = true;
-            res_node = m;
-        } else {
-            res_node = m;
+        Node* curr = root;
+        while (curr) {
+            if (key < curr->key) curr = curr->left;
+            else if (curr->key < key) curr = curr->right;
+            else return {iterator(curr, root), false};
         }
+
+        Node *l, *r;
+        split(root, key, l, r);
+        Node* m = new Node(key);
         root = merge(l, merge(m, r));
         if (root) root->parent = nullptr;
-        return {iterator(res_node, root), inserted};
+        return {iterator(m, root), true};
     }
 
     void erase(T key) {
